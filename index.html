@@ -852,7 +852,10 @@
     const MAX = 5;
 
     function today() {
-        return new Date().toISOString().slice(0, 10);
+        // Use Eastern Time for daily reset
+        return new Date().toLocaleDateString('en-CA', {
+            timeZone: 'America/New_York'
+        });
     }
 
     // Seeded RNG — same output for same seed every time
