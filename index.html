@@ -1349,24 +1349,16 @@
         function playClip() {
             if (playing || gameOver)
                 return;
-            if (audioRef.current) {
-                audioRef.current.pause();
-                audioRef.current = null
-            }
             clearInterval(ivRef.current);
 
-            const audio = new Audio(song.audio);
+            // Create fresh audio each time — most reliable on iOS
+            const audio = new Audio();
             audioRef.current = audio;
             audio.volume = 0.9;
-            audio.preload = 'auto';
 
-            // Seek to the right position, then wait for it to be ready before starting timer
-            audio.addEventListener('canplay', function onReady() {
-                audio.removeEventListener('canplay', onReady);
-                audio.play().catch(() => {});
+            function startTimer() {
                 setPlaying(true);
                 setProgress(0);
-
                 const start = Date.now();
                 ivRef.current = setInterval(() => {
                     const el = (Date.now() - start) / 1000;
@@ -1379,10 +1371,17 @@
                         setProgress(0);
                     }
                 }, 50);
+            }
+
+            audio.addEventListener('playing', function onPlaying() {
+                audio.removeEventListener('playing', onPlaying);
+                startTimer();
             });
 
-            // Seek after setting up the listener
+            // Set src and currentTime, then play — all synchronous setup before play()
+            audio.src = song.audio;
             audio.currentTime = startOffset;
+            audio.play().catch(() => setPlaying(false));
         }
 
         useEffect(() => () => {
