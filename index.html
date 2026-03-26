@@ -969,9 +969,28 @@
     ];
 
     function getDailySong() {
-        const d = today();
-        const seed = d.split('-').reduce((a, v) => a + parseInt(v), 0);
-        return SONGS[seed % SONGS.length];
+        // Build a deterministic shuffled order that cycles through all 15 songs
+        // before repeating. We use the epoch day number divided by song count
+        // to determine which "cycle" we're in, then shuffle within that cycle
+        // using the cycle number as seed.
+        const epochDay = Math.floor(Date.now() / 86400000);
+        const cycleIndex = epochDay % SONGS.length;
+        const cycleNum = Math.floor(epochDay / SONGS.length);
+
+        // Seeded shuffle for this cycle
+        function seededShuffle(arr, seed) {
+            const a = [...arr];
+            let s = seed;
+            for (let i = a.length - 1; i > 0; i--) {
+                s = (s * 1664525 + 1013904223) & 0xffffffff;
+                const j = (s >>> 0) % (i + 1);
+                [a[i], a[j]] = [a[j], a[i]];
+            }
+            return a;
+        }
+
+        const shuffled = seededShuffle(SONGS, cycleNum + 9999);
+        return shuffled[cycleIndex];
     }
 
     const RAT_PATH = "M 0.0 33.9 L 1.6 32.2 L 3.3 30.7 L 5.1 29.1 L 6.6 27.6 L 5.0 25.9 L 3.4 24.2 L 4.5 22.1 L 6.0 20.3 L 7.7 18.7 L 9.6 17.3 L 11.5 16.0 L 13.8 15.0 L 16.1 14.0 L 18.5 13.2 L 20.6 12.7 L 22.9 12.0 L 25.3 11.6 L 27.8 11.1 L 29.8 10.1 L 30.7 7.7 L 31.1 4.9 L 32.0 2.5 L 33.5 0.7 L 36.3 1.0 L 38.3 2.2 L 39.9 3.9 L 40.9 5.3 L 42.2 3.3 L 43.8 1.6 L 46.0 0.5 L 48.9 0.1 L 51.5 0.2 L 53.6 1.5 L 55.2 3.1 L 56.3 5.3 L 57.1 7.7 L 57.9 10.2 L 58.0 13.4 L 57.1 15.8 L 55.5 17.4 L 53.7 18.9 L 53.0 20.1 L 55.6 20.7 L 57.7 21.0 L 60.2 20.4 L 62.8 19.7 L 65.0 18.9 L 67.0 18.1 L 69.4 17.3 L 71.8 16.7 L 74.2 16.3 L 76.8 16.1 L 78.9 16.6 L 81.6 16.1 L 83.8 16.4 L 86.2 17.0 L 88.5 17.6 L 90.9 18.4 L 92.9 19.4 L 95.1 20.5 L 97.1 21.8 L 99.0 23.2 L 100.8 24.6 L 102.5 26.2 L 104.1 27.8 L 105.6 29.6 L 107.0 31.4 L 108.3 33.4 L 109.6 35.4 L 110.6 37.7 L 111.4 40.1 L 112.2 42.4 L 112.8 45.0 L 113.1 47.9 L 113.2 50.6 L 113.2 52.8 L 112.6 55.5 L 111.4 57.6 L 112.0 60.0 L 113.1 62.2 L 114.4 64.2 L 115.6 66.3 L 116.7 68.4 L 117.6 70.8 L 118.3 73.3 L 118.8 76.1 L 118.9 79.3 L 118.3 81.9 L 117.5 84.3 L 116.1 86.2 L 114.6 88.0 L 113.0 89.7 L 111.4 91.4 L 109.7 92.9 L 107.9 94.3 L 106.0 95.5 L 103.7 96.5 L 101.3 97.3 L 99.0 98.1 L 96.4 98.7 L 93.7 99.2 L 91.1 99.6 L 88.5 99.9 L 86.3 99.8 L 83.7 99.6 L 81.6 99.9 L 79.0 99.7 L 76.3 99.4 L 73.9 98.8 L 71.2 98.2 L 68.8 97.6 L 66.4 96.7 L 64.1 95.8 L 62.0 94.8 L 60.0 93.6 L 58.2 92.1 L 56.7 90.4 L 55.3 88.5 L 54.5 86.0 L 54.4 83.1 L 55.1 80.6 L 56.8 80.5 L 57.6 83.0 L 58.3 85.6 L 59.6 87.5 L 61.5 88.9 L 63.6 90.1 L 66.0 91.0 L 68.3 91.9 L 70.6 92.4 L 72.5 93.0 L 74.6 93.2 L 77.5 93.6 L 80.5 93.8 L 83.2 94.0 L 86.3 93.8 L 89.0 93.5 L 91.7 93.1 L 93.7 92.6 L 96.0 91.9 L 98.4 91.1 L 100.7 90.1 L 102.8 88.9 L 104.8 87.7 L 106.7 86.2 L 108.3 84.6 L 109.6 82.6 L 110.6 80.4 L 111.1 77.6 L 111.1 74.8 L 110.5 72.4 L 109.6 70.0 L 108.0 68.3 L 105.3 68.4 L 103.4 69.8 L 101.9 71.5 L 100.2 73.2 L 98.2 74.4 L 96.0 75.5 L 93.8 76.3 L 91.6 77.3 L 89.4 78.4 L 87.1 79.3 L 84.8 80.0 L 82.5 80.8 L 80.1 81.4 L 77.8 82.3 L 75.6 83.5 L 73.3 84.2 L 70.8 83.4 L 69.5 82.1 L 67.7 82.2 L 67.0 80.4 L 66.1 79.1 L 67.3 77.3 L 67.0 75.5 L 69.0 74.2 L 70.9 74.5 L 73.1 74.3 L 73.4 74.0 L 70.7 73.6 L 68.3 73.1 L 66.0 72.8 L 63.7 73.2 L 61.1 73.6 L 58.8 74.4 L 56.8 75.7 L 55.0 76.7 L 53.5 75.4 L 51.4 75.5 L 49.9 76.1 L 48.4 77.8 L 46.6 79.3 L 45.0 80.9 L 43.3 82.5 L 42.0 80.7 L 40.3 81.8 L 39.4 80.0 L 37.6 79.7 L 37.0 77.6 L 38.5 75.9 L 38.6 74.1 L 40.4 72.7 L 42.9 72.2 L 43.2 69.5 L 42.9 66.6 L 41.5 64.6 L 40.4 65.2 L 40.0 67.7 L 39.4 70.3 L 39.2 72.4 L 37.8 74.2 L 35.9 75.6 L 34.8 73.9 L 33.2 75.3 L 31.3 76.0 L 29.0 75.0 L 28.4 73.0 L 28.1 71.3 L 29.8 69.7 L 31.9 68.6 L 31.7 66.6 L 31.0 64.0 L 30.4 61.4 L 29.7 58.8 L 29.1 56.1 L 29.3 53.4 L 28.6 50.8 L 28.1 48.3 L 27.3 45.8 L 26.7 43.5 L 25.6 41.2 L 24.4 39.2 L 22.6 38.0 L 20.4 36.9 L 18.1 35.9 L 16.1 34.7 L 14.2 34.2 L 13.7 36.9 L 13.2 39.7 L 12.5 42.0 L 10.8 41.3 L 10.9 38.1 L 11.4 35.6 L 11.8 33.0 L 10.3 32.2 L 8.9 34.1 L 7.7 36.1 L 6.2 37.9 L 5.3 36.5 L 6.4 34.3 L 7.6 32.3 L 8.9 30.3 L 7.0 30.6 L 5.1 31.9 L 3.3 33.4 L 1.5 34.8 Z";
@@ -1493,7 +1512,7 @@
         },
         h('div', {
             className: 'logo'
-        }, 'Ratlandle', h('small', null, 'daily music game')),
+        }, 'Ratlandle', h('small', null, "Ratland the Band's Signature Game")),
         h('div', {
             className: 'hdr-r'
         },
@@ -1645,7 +1664,20 @@
         ),
         h('div', {
             className: 'ftr'
-        }, 'ratlandle · every day · one song')
+        },
+        'Thanks for playing! See you tomorrow ;)',
+        h('br'),
+        h('br'),
+        'While you wait for tomorrow\'s game, check us out on ',
+        h('a', {
+            href: 'https://ratlandtheband.bandcamp.com',
+            target: '_blank',
+            style: {
+                color: 'var(--k)',
+                textDecoration: 'underline'
+            }
+        }, 'Bandcamp')
+        )
         ),
         showLB && h(LBModal, {
             onClose: () => setShowLB(false),
