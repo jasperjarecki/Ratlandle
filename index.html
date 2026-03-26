@@ -972,11 +972,10 @@
     ];
 
     function getDailySong() {
-        // Build a deterministic shuffled order that cycles through all 15 songs
-        // before repeating. We use the epoch day number divided by song count
-        // to determine which "cycle" we're in, then shuffle within that cycle
-        // using the cycle number as seed.
-        const epochDay = Math.floor(Date.now() / 86400000);
+        // Use Eastern Time date string as seed so it matches the today() function
+        const dateStr = today();
+        const dateSeed = dateStr.replace(/-/g, '');
+        const epochDay = parseInt(dateSeed) % 10000;
         const cycleIndex = epochDay % SONGS.length;
         const cycleNum = Math.floor(epochDay / SONGS.length);
 
@@ -1432,7 +1431,9 @@
         async function saveResult(fg, dw) {
             const gc = fg.filter(g => !g.skipped).length;
             const {data: prev} = await sb.from('profiles').select('*').eq('id', user.id).single();
-            const yest = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+            const yest = new Date(Date.now() - 86400000).toLocaleDateString('en-CA', {
+                timeZone: 'America/New_York'
+            });
             const ns = dw ? (prev?.last_played === yest ? (prev.current_streak || 0) + 1 : 1) : 0;
             const np = {
                 total_games: (prev?.total_games || 0) + 1,
