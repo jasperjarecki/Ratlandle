@@ -232,10 +232,10 @@
     }
 
     .clip-lbl {
-        font-size: .63rem;
-        letter-spacing: .16em;
+        font-size: .78rem;
+        letter-spacing: .08em;
         text-transform: none;
-        color: var(--dim);
+        color: var(--k);
         text-align: center
     }
 
@@ -1085,9 +1085,26 @@
         h('div', {
             className: 'clip-lbl'
         },
-        playing ? `playing ${clipDur}s clip...` :
+        playing ? h('span', {
+            style: {
+                color: 'var(--dim)'
+            }
+        }, `playing ${clipDur}s clip...`) :
         gameOver ? '' :
-        `tap rat · guess ${guessIndex + 1} of ${MAX} · ${clipDur}s clip`
+        h('span', null,
+        h('span', {
+            style: {
+                display: 'block',
+                marginBottom: '.25rem',
+                color: 'var(--k)'
+            }
+        }, 'tap rat'),
+        h('span', {
+            style: {
+                color: 'var(--dim)'
+            }
+        }, `guess ${guessIndex + 1} of ${MAX} · ${clipDur}s clip`)
+        )
         )
         );
     }
