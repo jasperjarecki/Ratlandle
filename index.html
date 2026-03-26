@@ -1619,7 +1619,16 @@
         },
         h('div', {
             className: 'rtitle'
-        }, fw ? (fg.filter(g => !g.skipped).length === 1 ? 'first try! 🐀' : 'got it!') : 'nice try 🐀'),
+        }, fw ? (() => {
+            const gc = fg.filter(g => !g.skipped).length;
+            if (gc === 1)
+                return 'You got it! First try! 🐀';
+            if (gc === 2)
+                return 'You got it! Second try! 🐀';
+            if (gc === 3)
+                return 'You got it! Third try! 🐀';
+            return `You got it! Guess ${gc}! 🐀`;
+        })() : 'Rats! Better luck tomorrow 🐀'),
         h('div', null, h('div', {
             className: 'rsong'
         }, song.title)),
