@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+]<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8"/>
@@ -28,7 +28,7 @@
     }
 
     html, body, #root {
-        height: 100%;
+        height: 100dvh;
         background: var(--w);
         color: var(--k);
         font-family: 'MADE Sunflower', serif
@@ -45,7 +45,7 @@
     }
 
     .app {
-        min-height: 100vh;
+        min-height: 100dvh;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -105,7 +105,7 @@
 
     .game {
         width: 100%;
-        margin-top: 2.2rem;
+        margin-top: 1.4rem;
         display: flex;
         flex-direction: column;
         gap: 1.5rem
@@ -521,7 +521,7 @@
     }
 
     .auth-wrap {
-        min-height: 100vh;
+        min-height: 100dvh;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -829,7 +829,7 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        min-height: 100vh;
+        min-height: 100dvh;
         gap: 1rem
     }
     </style>
@@ -1357,24 +1357,32 @@
 
             const audio = new Audio(song.audio);
             audioRef.current = audio;
-            audio.currentTime = startOffset;
             audio.volume = 0.9;
-            audio.play().catch(() => {});
-            setPlaying(true);
-            setProgress(0);
+            audio.preload = 'auto';
 
-            const start = Date.now();
-            ivRef.current = setInterval(() => {
-                const el = (Date.now() - start) / 1000;
-                setProgress(Math.min((el / clipDur) * 100, 100));
-                if (el >= clipDur) {
-                    clearInterval(ivRef.current);
-                    audio.pause();
-                    audioRef.current = null;
-                    setPlaying(false);
-                    setProgress(0);
-                }
-            }, 50);
+            // Seek to the right position, then wait for it to be ready before starting timer
+            audio.addEventListener('canplay', function onReady() {
+                audio.removeEventListener('canplay', onReady);
+                audio.play().catch(() => {});
+                setPlaying(true);
+                setProgress(0);
+
+                const start = Date.now();
+                ivRef.current = setInterval(() => {
+                    const el = (Date.now() - start) / 1000;
+                    setProgress(Math.min((el / clipDur) * 100, 100));
+                    if (el >= clipDur) {
+                        clearInterval(ivRef.current);
+                        audio.pause();
+                        audioRef.current = null;
+                        setPlaying(false);
+                        setProgress(0);
+                    }
+                }, 50);
+            });
+
+            // Seek after setting up the listener
+            audio.currentTime = startOffset;
         }
 
         useEffect(() => () => {
