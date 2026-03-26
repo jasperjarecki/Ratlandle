@@ -1,4 +1,4 @@
-]<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8"/>
@@ -1460,9 +1460,15 @@
         function copyShare() {
             const fg = alreadyPlayed ? savedGuesses : guesses;
             const fw = alreadyPlayed ? won : won;
-            const hd = 'ratlandle 🐀 ' + today() + '\n' + (fw ? '🐀 ' + fg.filter(g => !g.skipped).length + '/5' : '🐀 x/5') + '\n';
+            const guessCount = fg.filter(g => !g.skipped).length;
+            const firstLine = fw
+            ? `I got today's Ratlandle in ${guessCount} guess${guessCount !== 1 ? 'es' : ''}!`
+            : `Rats! Today's Ratlandle totally stumped me. Can you give it a try?`;
             const bars = fg.map(g => g.skipped ? '⬜' : g.correct ? '⬛' : '🔲').join('');
-            navigator.clipboard.writeText(hd + bars + '\nratlandle.app').then(() => showToast('copied!')).catch(() => showToast('copied!'));
+            const text = fw
+            ? `${firstLine}\n\n🐀🐀🐀\n\n${bars}\n\nratlandle.com`
+            : `${firstLine}\n\n🐀🐀🐀\n\nratlandle.com`;
+            navigator.clipboard.writeText(text).then(() => showToast('copied!')).catch(() => showToast('copied!'));
         }
 
         const fg = alreadyPlayed ? savedGuesses : guesses;
