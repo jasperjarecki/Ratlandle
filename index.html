@@ -1386,7 +1386,7 @@
         }, [input]);
 
         function playClip() {
-            if (playing || gameOver)
+            if (playing || gameOver || audioRef.current)
                 return;
             clearInterval(ivRef.current);
 
